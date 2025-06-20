@@ -55,8 +55,8 @@ async (conn, mek, m, { from, q, reply }) => {
 /// tiktok============================
 
 cmd({ 
-    pattern: "tiktok", 
-    alias: ["tt"], 
+    pattern: "xxxxx", 
+    alias: ["xxxx"], 
     react: "🎥", 
     desc: "download tt videos", 
     category: "download", 
@@ -135,8 +135,8 @@ conn.ev.on("messages.upsert", async message => {
 // Facebook-dl =====================
 
 cmd({
-  pattern: "fb",
-  alias: ["facebook"],
+  pattern: "xgggg",
+  alias: ["fhfhggcgg"],
   desc: "Download Facebook videos",
   category: "download",
   filename: __filename
