@@ -1,6 +1,5 @@
 const { cmd } = require('../command');
 const axios = require('axios');
-const { proto } = require('@whiskeysockets/baileys');
 
 cmd({
     pattern: "fb",
