@@ -2,8 +2,8 @@ const config = require('../config');
 const { cmd, commands } = require('../command');
 
 cmd({
-    pattern: "ping",
-    alias: ["speed","pong"],use: '.ping',
+    pattern: "ping2",
+    alias: ["speed","pong"],use: '.ping3',
     desc: "Check bot's response time.",
     category: "main",
     react: "⚡",
@@ -57,7 +57,7 @@ async (conn, mek, m, { from, quoted, sender, reply }) => {
 // ping2 
 
 cmd({
-    pattern: "ping2",
+    pattern: "ping",
     desc: "Check bot's response time.",
     category: "main",
     react: "🍂",
@@ -69,7 +69,7 @@ async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sen
         const message = await conn.sendMessage(from, { text: '*PINGING...*' })
         const endTime = Date.now()
         const ping = endTime - startTime
-        await conn.sendMessage(from, { text: `*📡 SHABAN-MD SPEED : ${ping}ms*` }, { quoted: message })
+        await conn.sendMessage(from, { text: `*📡 SHABAN-MD SPEED  ${ping}ms*` }, { quoted: message })
     } catch (e) {
         console.log(e)
         reply(`${e}`)
