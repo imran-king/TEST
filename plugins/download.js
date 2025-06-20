@@ -14,33 +14,41 @@ cmd({
     react: "📷",
     filename: __filename
 },
-async (conn, mek, m, { from, args, q, reply }) => {
+async (conn, mek, m, { from, q, reply }) => {
     try {
-        if (!q) return reply("Please provide an Instagram video link.");
-        if (!q.includes("instagram.com")) return reply("Invalid Instagram link.");
-        
-        reply("Downloading video, please wait...");
-        
-        const apiUrl = `https://rest-lily.vercel.app/api/downloader/igdl?url=${q}`;
+        if (!q) return reply("🔗 Please provide an Instagram link.");
+        if (!q.includes("instagram.com")) return reply("❌ Invalid Instagram link.");
+
+        const apiUrl = `https://bk9.fun/download/instagram?url=${encodeURIComponent(q)}`;
         const { data } = await axios.get(apiUrl);
-        
-        if (!data.status || !data.data || !data.data[0]) return reply("Failed to fetch Instagram video.");
-        
-        const { url } = data.data[0];
-        
-        const caption = 
-`📷 *Instagram Video* 📷\n\n` +
-`👤 *Creator* *SHABAN MD*`;
-        
-        await conn.sendMessage(from, {
-            video: { url: url },
-            caption: caption,
-            contextInfo: { mentionedJid: [m.sender] }
-        }, { quoted: mek });
-        
+
+        if (!data.status || !data.BK9 || !data.BK9.length) {
+            return reply("⚠️ Failed to download media from Instagram.");
+        }
+
+        // Get first media (could be video or image)
+        const media = data.BK9[0];
+        const isVideo = media.type === "video" || media.url.includes(".mp4");
+
+        const caption = `📷 *Instagram Media*\n\n👤 *By SHABAN-MD*\n🔗 *Source:* Instagram`;
+
+        if (isVideo) {
+            await conn.sendMessage(from, {
+                video: { url: media.url },
+                caption,
+                contextInfo: { mentionedJid: [m.sender] }
+            }, { quoted: mek });
+        } else {
+            await conn.sendMessage(from, {
+                image: { url: media.url },
+                caption,
+                contextInfo: { mentionedJid: [m.sender] }
+            }, { quoted: mek });
+        }
+
     } catch (e) {
-        console.error("Error in Instagram downloader command:", e);
-        reply(`An error occurred: ${e.message}`);
+        console.error("❌ Instagram Downloader Error:", e);
+        reply(`⚠️ Error occurred:\n${e.message}`);
     }
 });
 
