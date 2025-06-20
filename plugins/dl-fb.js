@@ -15,24 +15,26 @@ async (conn, mek, m, { from, args, q, reply }) => {
         if (!q.includes("facebook.com") && !q.includes("fb.watch"))
             return reply("❌ Invalid Facebook video URL.");
 
-        reply("⏳ Downloading Facebook video...");
+        reply("🎞️ Downloading Facebook video...");
 
         const apiUrl = `https://delirius-apiofc.vercel.app/download/facebook?url=${encodeURIComponent(q)}`;
-        const { data } = await axios.get(apiUrl);
+        const response = await axios.get(apiUrl);
+        const data = response.data;
+
+        console.log("🔥 API RESPONSE:", data); // Debug log
 
         if (!data || !data.urls || !Array.isArray(data.urls)) {
-            return reply("❌ Failed to fetch video data.");
+            return reply("❌ Failed to fetch video data from API.");
         }
 
         const hdVideo = data.urls.find(x => x.hd)?.hd;
         const sdVideo = data.urls.find(x => x.sd)?.sd;
-
         const videoUrl = hdVideo || sdVideo;
 
-        if (!videoUrl) return reply("❌ Video not found in HD or SD.");
+        if (!videoUrl) return reply("❌ Video not available in HD or SD format.");
 
         const caption = `🎬 *Facebook Video*\n\n📄 *Title:* ${data.title || "No Title"}\n` +
-                        `📥 *Quality:* ${hdVideo ? "HD" : "SD"}\n🔗 *Source:* SHABAN-MD`;
+                        `📥 *Quality:* ${hdVideo ? "HD" : "SD"}\n🔗 *Source:* ${q}`;
 
         await conn.sendMessage(from, {
             video: { url: videoUrl },
@@ -41,7 +43,8 @@ async (conn, mek, m, { from, args, q, reply }) => {
         }, { quoted: mek });
 
     } catch (e) {
-        console.error("❌ Facebook Downloader Error:", e);
-        reply(`⚠️ An error occurred:\n${e.message}`);
+        console.error("❌ Facebook Downloader Error:", e.response?.data || e.message || e);
+        const errorMsg = e.response?.data?.message || e.message || "Unknown error occurred.";
+        reply(`⚠️ An error occurred while processing your request:\n${errorMsg}`);
     }
 });
