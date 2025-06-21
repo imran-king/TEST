@@ -2,7 +2,7 @@ const config = require('../config');
 const { cmd, commands } = require('../command');
 
 cmd({
-    pattern: "ping2",
+    pattern: "ping",
     alias: ["speed","pong"],use: '.ping3',
     desc: "Check bot's response time.",
     category: "main",
@@ -53,26 +53,3 @@ async (conn, mek, m, { from, quoted, sender, reply }) => {
         reply(`An error occurred: ${e.message}`);
     }
 });
-
-// ping2 
-
-cmd({
-    pattern: "ping",
-    desc: "Check bot's response time.",
-    category: "main",
-    react: "📡",
-    filename: __filename
-},
-async (conn, mek, m, { from, reply }) => {
-    try {
-        const start = performance.now()
-        await conn.sendPresenceUpdate('composing', from)
-        const end = performance.now()
-        const ping = Math.round(end - start)
-
-        reply(`*📡 SHABAN-MD SPEED ${ping}ms*`)
-    } catch (e) {
-        console.log(e)
-        reply(`${e}`)
-    }
-})
