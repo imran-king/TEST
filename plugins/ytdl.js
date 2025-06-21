@@ -5,8 +5,8 @@ const { ytsearch, ytmp3, ytmp4 } = require('@dark-yasiya/yt-dl.js');
 // video
 
 cmd({ 
-    pattern: "mp4", 
-    alias: ["video", "song"], 
+    pattern: "video", 
+    alias: ["video", "video"], 
     react: "🎥", 
     desc: "Download Youtube song", 
     category: "main", 
@@ -61,8 +61,8 @@ cmd({
 // play
 
 cmd({ 
-     pattern: "mp3", 
-     alias: ["ytdl3", "play"], 
+     pattern: "play", 
+     alias: ["play", "play"], 
      react: "🎶", 
      desc: "Download Youtube song",
      category: "main", 
@@ -116,4 +116,49 @@ const yt = await ytsearch(q);
     reply("An error occurred. Please try again later.");
 }
 
+});
+
+// Mp3 Url
+
+cmd({ 
+    pattern: "mp3", 
+    alias: ["mp3"], 
+    react: "🎶", 
+    desc: "Download Youtube song",
+    category: "main", 
+    use: '.play <Yt song name>', 
+    filename: __filename 
+}, 
+async (conn, mek, m, { from, prefix, quoted, q, reply }) => {
+    try {
+        if (!q) return await reply("🎵 Please provide a song name to search on YouTube.");
+
+        // API Call with new structure
+        let apiUrl = `https://api-aswin-sparky.koyeb.app/api/downloader/song?search=${encodeURIComponent(q)}`;
+        let response = await fetch(apiUrl);
+        let json = await response.json();
+
+        if (!json.status || !json.data || !json.data.downloadURL) {
+            return reply("❌ Failed to fetch the song. Try with another keyword.");
+        }
+
+        // Message format
+        let caption = `*🎧 SHABAN-MD YT MP3 DOWNLOADER 🎧*\n\n` +
+                      `╭━━❐━⪼\n` +
+                      `┇๏ *Title* - ${json.data.title}\n` +
+                      `╰━━❑━⪼\n\n` +
+                      `> *© Pᴏᴡᴇʀᴇᴅ Bʏ Sʜᴀʙᴀɴ-Mᴅ ♡*`;
+
+        // Send as document MP3
+        await conn.sendMessage(from, {
+            document: { url: json.data.downloadURL },
+            mimetype: "audio/mpeg",
+            fileName: `${json.data.title}.mp3`,
+            caption: caption
+        }, { quoted: mek });
+
+    } catch (e) {
+        console.error(e);
+        reply("⚠️ An unexpected error occurred. Please try again later.");
+    }
 });
