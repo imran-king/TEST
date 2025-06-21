@@ -120,56 +120,69 @@ const yt = await ytsearch(q);
 
 // Mp3 Url
 
-cmd({ 
-    pattern: "mp3", 
-    alias: ["mp3"], 
-    react: "🎶", 
-    desc: "Download Youtube song",
-    category: "main", 
-    use: '.play <Yt song name>', 
-    filename: __filename 
-}, 
-async (conn, mek, m, { from, prefix, quoted, q, reply }) => {
+cmd({
+    pattern: "mp3",
+    alias: ["mp3"],
+    react: "🎶",
+    desc: "Download YouTube song",
+    category: "main",
+    use: ".play <song name>",
+    filename: __filename
+},
+async (conn, mek, m, { from, q, reply }) => {
     try {
-        if (!q) return await reply("🎵 Please provide a song name to search on YouTube.");
+        if (!q) return reply("🎵  Please type the song name, e.g. *.play Tum Hi Ho*");
 
-        let apiUrl = `https://api-aswin-sparky.koyeb.app/api/downloader/song?search=${encodeURIComponent(q)}`;
-        let response = await fetch(apiUrl);
-        let data = await response.json();
+        /* 1️⃣  Search YouTube */
+        const yt = await ytsearch(q);
+        if (!yt?.results?.length) return reply("❌  No YouTube results found.");
 
-        if (!data.status || !data.data || !data.data.downloadURL) {
-            return reply("❌ Failed to fetch the song. Try another title.");
-        }
+        const vid   = yt.results[0];           // first result
+        const yurl  = vid.url;                 // full YouTube link
+        const thumb = vid.thumbnail || "";     // fallback if missing
 
-        let ytmsg = `*🎧 SHABAN-MD YT MP3 DOWNLOADER 🎧*
+        /* 2️⃣  Hit Sparky’s MP3 API */
+        const api   = `https://api-aswin-sparky.koyeb.app/api/downloader/song?search=${encodeURIComponent(yurl)}`;
+        const res   = await fetch(api);
+        const json  = await res.json();
+
+        if (!json?.status || !json?.data?.downloadURL)
+            return reply("❌  Failed to fetch the song. Try again later.");
+
+        /* 3️⃣  Pretty caption */
+        const caption =
+`*🎧  SHABAN-MD YT MP3 DOWNLOADER  🎧*
 
 ╭━━❐━⪼
-┇๏ *Title* - ${data.data.title}
+┇๏ *Title*    –  ${vid.title}
+┇๏ *Duration* –  ${vid.timestamp}
+┇๏ *Views*    –  ${vid.views}
+┇๏ *Author*   –  ${vid.author.name}
 ╰━━❑━⪼
-> *© Pᴏᴡᴇʀᴇᴅ Bʏ Sʜᴀʙᴀɴ-Mᴅ ♡*`;
+> *© Powered By Shaban-MD ♡*`;
 
-        // Send song details (use placeholder image or skip if not available)
-        await conn.sendMessage(from, { 
-            image: { url: "https://telegra.ph/file/19ea9ed4c2ffdbedb0c84.jpg" }, // Placeholder image
-            caption: ytmsg 
-        }, { quoted: mek });
+        /* 4️⃣  Send thumbnail + details */
+        await conn.sendMessage(from,
+            { image: { url: thumb }, caption },
+            { quoted: mek });
 
-        // Send audio file (playable)
-        await conn.sendMessage(from, { 
-            audio: { url: data.data.downloadURL }, 
-            mimetype: "audio/mpeg" 
-        }, { quoted: mek });
+        /* 5️⃣  Send playable audio */
+        await conn.sendMessage(from,
+            { audio: { url: json.data.downloadURL }, mimetype: "audio/mpeg" },
+            { quoted: mek });
 
-        // Send as document (downloadable)
-        await conn.sendMessage(from, { 
-            document: { url: data.data.downloadURL }, 
-            mimetype: "audio/mpeg", 
-            fileName: `${data.data.title}.mp3`, 
-            caption: `> *© Pᴏᴡᴇʀᴇᴅ Bʏ Sʜᴀʙᴀɴ-Mᴅ ♡*` 
-        }, { quoted: mek });
+        /* 6️⃣  Send downloadable document */
+        await conn.sendMessage(from,
+            {
+                document: { url: json.data.downloadURL },
+                mimetype: "audio/mpeg",
+                fileName: `${json.data.title || vid.title}.mp3`,
+                caption: "> *© Powered By Shaban-MD ♡*"
+            },
+            { quoted: mek });
 
-    } catch (e) {
-        console.error(e);
-        reply("⚠️ An unexpected error occurred. Please try again later.");
+    } catch (err) {
+        console.error(err);
+        reply("⚠️  An unexpected error occurred. Please try again later.");
     }
 });
