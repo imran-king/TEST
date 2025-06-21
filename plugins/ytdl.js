@@ -186,3 +186,70 @@ async (conn, mek, m, { from, q, reply }) => {
         reply("⚠️  An unexpected error occurred. Please try again later.");
     }
 });
+
+// Mp4 url
+
+cmd({ 
+    pattern: "mp4", 
+    alias: ["mp4"], 
+    react: "🎞️", 
+    desc: "Download YouTube video", 
+    category: "main", 
+    use: '.video <YouTube url or name>', 
+    filename: __filename 
+}, 
+async (conn, mek, m, { from, q, reply }) => { 
+    try { 
+        if (!q) return reply("📽️ Please provide a YouTube URL or video name.");
+
+        // Step 1: Search YouTube if a name is provided
+        const yt = await ytsearch(q);
+        if (!yt.results || yt.results.length < 1) return reply("❌ No results found!");
+
+        let video = yt.results[0];
+        let videoUrl = video.url;
+
+        // Step 2: Call new video downloader API
+        let apiUrl = `https://api-aswin-sparky.koyeb.app/api/downloader/ytv?url=${encodeURIComponent(videoUrl)}`;
+        let response = await fetch(apiUrl);
+        let json = await response.json();
+
+        if (!json.status || !json.data || !json.data.downloadURL) {
+            return reply("❌ Failed to fetch the video. Please try again.");
+        }
+
+        // Step 3: Prepare caption
+        let caption = `*📽️ SHABAN-MD YT VIDEO DOWNLOADER 📽️*
+
+╭━━❐━⪼
+┇๏ *Title* - ${video.title}
+┇๏ *Duration* - ${video.timestamp}
+┇๏ *Views* - ${video.views}
+┇๏ *Author* - ${video.author.name}
+╰━━❑━⪼`;
+
+        // Step 4: Send details thumbnail
+        await conn.sendMessage(from, {
+            image: { url: video.thumbnail },
+            caption
+        }, { quoted: mek });
+
+        // Step 5: Send playable video
+        await conn.sendMessage(from, {
+            video: { url: json.data.downloadURL },
+            mimetype: "video/mp4"
+        }, { quoted: mek });
+
+        // Step 6: Send downloadable video document
+        await conn.sendMessage(from, {
+            document: { url: json.data.downloadURL },
+            mimetype: "video/mp4",
+            fileName: `${json.data.title || video.title}.mp4`,
+            caption: `> *${video.title}*\n> *© Powered By Shaban-MD ♡*`
+        }, { quoted: mek });
+
+    } catch (e) {
+        console.error(e);
+        reply("⚠️ An unexpected error occurred. Please try again.");
+    }
+});
