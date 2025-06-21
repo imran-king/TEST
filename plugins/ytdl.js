@@ -123,7 +123,7 @@ const yt = await ytsearch(q);
 cmd({
     pattern: "mp3",
     alias: ["mp3"],
-    react: "🎶",
+    react: "🎛️",
     desc: "Download YouTube song",
     category: "main",
     use: ".play <song name>",
@@ -151,7 +151,7 @@ async (conn, mek, m, { from, q, reply }) => {
 
         /* 3️⃣  Pretty caption */
         const caption =
-`*🎧  SHABAN-MD YT MP3 DOWNLOADER  🎧*
+`*🎛️  SHABAN-MD YT MP3 DOWNLOADER  🎛️*
 
 ╭━━❐━⪼
 ┇๏ *Title*    –  ${vid.title}
