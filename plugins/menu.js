@@ -150,10 +150,10 @@ async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sen
         let dec = `╭━━〔 *Download Menu* 〕━━┈⊷
 ┃◈╭─────────────·๏
 ┃◈┃• 💎 facebook
-┃◈┃• 🌀 fb2
+┃◈┃• 🌀 facebook2
 ┃◈┃• 💡 likee
 ┃◈┃• 🔍 tiktoksearch
-┃◈┃• 📲 tiktok2
+┃◈┃• 📲 tiktok
 ┃◈┃• 🐦 twitter
 ┃◈┃• 📸 Instagram
 ┃◈┃• 👻 snapchat
@@ -166,11 +166,9 @@ async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sen
 ┃◈┃• 📡 spotifydl
 ┃◈┃• 🎧 play
 ┃◈┃• 🎶 play3
-┃◈┃• 🎧 play5
 ┃◈┃• 📹 video
 ┃◈┃• 🎼 mp3
 ┃◈┃• 🎥 mp4
-┃◈┃• 🎥 video5
 ┃◈┃• 🔎 yts
 ┃◈┃• 📂 mediafire
 ┃◈┃• 📂 gdrive 
