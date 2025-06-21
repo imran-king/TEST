@@ -133,28 +133,39 @@ async (conn, mek, m, { from, prefix, quoted, q, reply }) => {
     try {
         if (!q) return await reply("🎵 Please provide a song name to search on YouTube.");
 
-        // API Call with new structure
         let apiUrl = `https://api-aswin-sparky.koyeb.app/api/downloader/song?search=${encodeURIComponent(q)}`;
         let response = await fetch(apiUrl);
-        let json = await response.json();
+        let data = await response.json();
 
-        if (!json.status || !json.data || !json.data.downloadURL) {
-            return reply("❌ Failed to fetch the song. Try with another keyword.");
+        if (!data.status || !data.data || !data.data.downloadURL) {
+            return reply("❌ Failed to fetch the song. Try another title.");
         }
 
-        // Message format
-        let caption = `*🎧 SHABAN-MD YT MP3 DOWNLOADER 🎧*\n\n` +
-                      `╭━━❐━⪼\n` +
-                      `┇๏ *Title* - ${json.data.title}\n` +
-                      `╰━━❑━⪼\n\n` +
-                      `> *© Pᴏᴡᴇʀᴇᴅ Bʏ Sʜᴀʙᴀɴ-Mᴅ ♡*`;
+        let ytmsg = `*🎧 SHABAN-MD YT MP3 DOWNLOADER 🎧*
 
-        // Send as document MP3
-        await conn.sendMessage(from, {
-            document: { url: json.data.downloadURL },
-            mimetype: "audio/mpeg",
-            fileName: `${json.data.title}.mp3`,
-            caption: caption
+╭━━❐━⪼
+┇๏ *Title* - ${data.data.title}
+╰━━❑━⪼
+> *© Pᴏᴡᴇʀᴇᴅ Bʏ Sʜᴀʙᴀɴ-Mᴅ ♡*`;
+
+        // Send song details (use placeholder image or skip if not available)
+        await conn.sendMessage(from, { 
+            image: { url: "https://telegra.ph/file/19ea9ed4c2ffdbedb0c84.jpg" }, // Placeholder image
+            caption: ytmsg 
+        }, { quoted: mek });
+
+        // Send audio file (playable)
+        await conn.sendMessage(from, { 
+            audio: { url: data.data.downloadURL }, 
+            mimetype: "audio/mpeg" 
+        }, { quoted: mek });
+
+        // Send as document (downloadable)
+        await conn.sendMessage(from, { 
+            document: { url: data.data.downloadURL }, 
+            mimetype: "audio/mpeg", 
+            fileName: `${data.data.title}.mp3`, 
+            caption: `> *© Pᴏᴡᴇʀᴇᴅ Bʏ Sʜᴀʙᴀɴ-Mᴅ ♡*` 
         }, { quoted: mek });
 
     } catch (e) {
