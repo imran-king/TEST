@@ -55,7 +55,7 @@ console.log(e)
 //==============play6========================
 
 cmd({
-    pattern: "play5",
+    pattern: "play6",
     desc: "Download songs via YouTube.",
     react: "🎵",
     category: "download",
@@ -107,7 +107,7 @@ async (conn, mek, m, { from, quoted, q, pushname, reply }) => {
 //====================video_dl=======================
 
 cmd({
-    pattern: "darama5",
+    pattern: "darama6",
     alias: ["video5"],
     desc: "To download videos.",
     react: "🎥",
@@ -156,4 +156,3 @@ console.log(e)
   reply(`_Hi ${pushname} retry later_`)
 }
 })
-//
