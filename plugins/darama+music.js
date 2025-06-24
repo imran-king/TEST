@@ -3,7 +3,7 @@ const fg = require('api-dylux')
 const yts = require('yt-search')
 
 cmd({
-    pattern: "play6",
+    pattern: "cgfggg",
     desc: "To download songs.",
     react: "🎵",
     category: "download",
@@ -55,7 +55,7 @@ console.log(e)
 //==============play6========================
 
 cmd({
-    pattern: "play6",
+    pattern: "chghhjh",
     desc: "Download songs via YouTube.",
     react: "🎵",
     category: "download",
@@ -107,7 +107,7 @@ async (conn, mek, m, { from, quoted, q, pushname, reply }) => {
 //====================video_dl=======================
 
 cmd({
-    pattern: "darama6",
+    pattern: "xgchgjbj",
     alias: ["video5"],
     desc: "To download videos.",
     react: "🎥",
