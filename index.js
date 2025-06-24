@@ -358,28 +358,63 @@ conn.ev.on('messages.upsert', async (msg) => {
   }
     if(mek.message.viewOnceMessageV2)
     mek.message = (getContentType(mek.message) === 'ephemeralMessage') ? mek.message.ephemeralMessage.message : mek.message
-    if (mek.key && mek.key.remoteJid === 'status@broadcast' && config.AUTO_STATUS_SEEN === "true"){
-      await conn.readMessages([mek.key])
-    }
-  if (mek.key && mek.key.remoteJid === 'status@broadcast' && config.AUTO_STATUS_REACT === "true"){
-    const jawadlike = await conn.decodeJid(conn.user.id);
+    if (
+  mek.key &&
+  mek.key.remoteJid === 'status@broadcast' &&
+  config.AUTO_STATUS_REACT === "true"
+) {
+  try {
+    const jawadlike = await conn.decodeJid(conn.user?.id || '');
     const emojis = ['❤️', '🧡', '💛', '💚', '🩵', '💙', '💜', '🤎', '🖤', '🩶', '🤍', '🩷', '💝', '💖', '💗', '💓', '💞', '💕', '♥️', '❣️', '❤️‍🩹', '❤️‍🔥'];
     const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
-    await conn.sendMessage(mek.key.remoteJid, {
-      react: {
-        text: randomEmoji,
-        key: mek.key,
-      } 
-    }, { statusJidList: [mek.key.participant, jawadlike] });
-  }                       
-  if (mek.key && mek.key.remoteJid === 'status@broadcast' && config.AUTO_STATUS_REPLY === "true"){
-  const user = mek.key.participant
-  const text = `${config.AUTO_STATUS_MSG}`
-  await conn.sendMessage(user, { text: text, react: { text: '💜', key: mek.key } }, { quoted: mek })
-            }
-            await Promise.all([
-              saveMessage(mek),
-            ]);
+
+    if (mek.key.participant && jawadlike) {
+      await conn.sendMessage(mek.key.remoteJid, {
+        react: {
+          text: randomEmoji,
+          key: mek.key,
+        }
+      }, {
+        statusJidList: [mek.key.participant, jawadlike]
+      });
+    }
+  } catch (err) {
+    console.log('❌ AUTO_STATUS_REACT Error:', err);
+  }
+}
+
+if (
+  mek.key &&
+  mek.key.remoteJid === 'status@broadcast' &&
+  config.AUTO_STATUS_REPLY === "true"
+) {
+  try {
+    const user = mek.key.participant;
+    const text = `${config.AUTO_STATUS_MSG || '❤️'}`;
+
+    if (user) {
+      await conn.sendMessage(user, {
+        text: text,
+        react: {
+          text: '💜',
+          key: mek.key
+        }
+      }, {
+        quoted: mek
+      });
+    }
+  } catch (err) {
+    console.log('❌ AUTO_STATUS_REPLY Error:', err);
+  }
+}
+
+try {
+  await Promise.all([
+    saveMessage(mek),
+  ]);
+} catch (err) {
+  console.log('❌ saveMessage Error:', err);
+}
   const m = sms(conn, mek)
   const type = getContentType(mek.message)
   const content = JSON.stringify(mek.message)
