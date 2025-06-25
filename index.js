@@ -31,7 +31,6 @@ const {
   const P = require('pino')
   const config = require('./config')
   const GroupEvents = require('./lib/groupevents');
-  const startAutoBioUpdate = require('./lib/startAutoBioUpdate.js');
   const qrcode = require('qrcode-terminal')
   const StickersTypes = require('wa-sticker-formatter')
   const util = require('util')
@@ -122,26 +121,22 @@ const port = process.env.PORT || 3000;
       console.log(`⚠️ Bot disconnect ho gaya, reason code: ${code}`);
       connectToWA();
     }
+
   } else if (connection === 'open') {
     global.botStatus = "connected"; // 🟢 Status update
     console.log('🧬 Installing Plugins');
+
     const path = require('path');
     fs.readdirSync("./plugins/").forEach((plugin) => {
-      if (path.extname(plugin).toLowerCase() == ".js") {
+      if (path.extname(plugin).toLowerCase() === ".js") {
         require("./plugins/" + plugin);
       }
     });
+
     console.log('Plugins installed successful ✅');
     console.log('Bot connected to whatsapp ✅');
 
-    // Auto bio update ko yahan call karein
-    try {
-      await startAutoBioUpdate(conn);
-      console.log("Auto bio started successfully.");
-    } catch (err) {
-      console.log("Failed to start auto bio:", err.message);
-    }
-
+    // Send startup message
     let up = `*✨ Hello, SHABAN-MD Legend! ✨*
 
 ╭─〔 *🤖 SHABAN-MD BOT* 〕  
@@ -158,11 +153,15 @@ const port = process.env.PORT || 3000;
 ╰─🛠️ *Prefix:* \`${prefix}\`
 
 > _© MADE BY MR SHABAN_`;
-    conn.sendMessage(conn.user.id, { image: { url: `https://i.ibb.co/RK56DRW/shaban-md.jpg` }, caption: up });
+
+    conn.sendMessage(conn.user.id, {
+      image: { url: `https://i.ibb.co/RK56DRW/shaban-md.jpg` },
+      caption: up
+    });
   }
 });
 
-  conn.ev.on('creds.update', saveCreds)
+conn.ev.on('creds.update', saveCreds)
   
 // === AI Global Chatbot Handler ===
 const activatedUsers = new Set(); // To track users who have sent "chatbot on"
