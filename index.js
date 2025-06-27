@@ -68,21 +68,14 @@ const {
   
   //===================SESSION-AUTH============================
 if (!fs.existsSync(__dirname + '/sessions/creds.json')) {
-    if(!config.SESSION_ID) return console.log('Please add your session to SESSION_ID env !!')
-    
-    const sessdata = config.SESSION_ID.replace("Sarkarmd$", '');
-    try {
-        // Decode base64 string
-        const decodedData = Buffer.from(sessdata, 'base64').toString('utf-8');
-        
-        // Write decoded data to creds.json
-        fs.writeFileSync(__dirname + '/sessions/creds.json', decodedData);
-        console.log("Session decoded and saved successfully ✅");
-    } catch (err) {
-        console.error("Error decoding session data:", err);
-        throw err;
-    }
-}
+if(!config.SESSION_ID) return console.log('Please add your session to SESSION_ID env !!')
+const sessdata = config.SESSION_ID.replace("SHABAN-MD~", '');
+const filer = File.fromURL(`https://mega.nz/file/${sessdata}`)
+filer.download((err, data) => {
+if(err) throw err
+fs.writeFile(__dirname + '/sessions/creds.json', data, () => {
+console.log("Session downloaded ✅")
+})})}
 
 const express = require("express");
 const app = express();
@@ -121,22 +114,18 @@ const port = process.env.PORT || 3000;
       console.log(`⚠️ Bot disconnect ho gaya, reason code: ${code}`);
       connectToWA();
     }
-
   } else if (connection === 'open') {
     global.botStatus = "connected"; // 🟢 Status update
     console.log('🧬 Installing Plugins');
-
     const path = require('path');
     fs.readdirSync("./plugins/").forEach((plugin) => {
-      if (path.extname(plugin).toLowerCase() === ".js") {
+      if (path.extname(plugin).toLowerCase() == ".js") {
         require("./plugins/" + plugin);
       }
     });
-
     console.log('Plugins installed successful ✅');
     console.log('Bot connected to whatsapp ✅');
 
-    // Send startup message
     let up = `*✨ Hello, SHABAN-MD Legend! ✨*
 
 ╭─〔 *🤖 SHABAN-MD BOT* 〕  
@@ -153,11 +142,7 @@ const port = process.env.PORT || 3000;
 ╰─🛠️ *Prefix:* \`${prefix}\`
 
 > _© MADE BY MR SHABAN_`;
-
-    conn.sendMessage(conn.user.id, {
-      image: { url: `https://i.ibb.co/RK56DRW/shaban-md.jpg` },
-      caption: up
-    });
+    conn.sendMessage(conn.user.id, { image: { url: `https://i.ibb.co/RK56DRW/shaban-md.jpg` }, caption: up });
   }
 });
 
