@@ -9,9 +9,19 @@ cmd({
     react: "🤖",
     filename: __filename
 },
-async (conn, mek, m, { from, args, q, reply, react }) => {
+async (conn, mek, m, { from, args, q, reply }) => {
     try {
-        if (!q) return reply("Please provide a message for the AI.\nExample: `.ai Hello`");
+        // Optional reaction function fallback
+        const react = async (emoji) => {
+            if (m && m.react) {
+                await m.react(emoji);
+            }
+        };
+
+        if (!q) {
+            await react("❌");
+            return reply("Please provide a message for the AI.\nExample: `.ai Hello`");
+        }
 
         const apiUrl = `https://apis-keith.vercel.app/ai/gpt?q=${encodeURIComponent(q)}`;
         const { data } = await axios.get(apiUrl);
@@ -25,6 +35,9 @@ async (conn, mek, m, { from, args, q, reply, react }) => {
         await react("✅");
     } catch (e) {
         console.error("Error in AI command:", e);
+        const react = async (emoji) => {
+            if (m && m.react) await m.react(emoji);
+        };
         await react("❌");
         reply("An error occurred while communicating with the AI.");
     }
