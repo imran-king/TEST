@@ -7,7 +7,7 @@ RUN apt-get update && \
 USER node
 RUN git clone https://github.com/MRSHABAN40/TEST.git /home/node/TEST
 WORKDIR /home/node/TEST
-RUN chmod -R 777 /home/node/MR/
+RUN chmod -R 777 /home/node/TEST/
 RUN yarn install --network-concurrency 1
 EXPOSE 7860
 ENV NODE_ENV=production
