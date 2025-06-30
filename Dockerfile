@@ -5,8 +5,8 @@ RUN apt-get update && \
     apt-get upgrade -y && \
     rm -rf /var/lib/apt/lists/*
 USER node
-RUN git clone https://github.com/shani-kh/MR.git /home/node/MR
-WORKDIR /home/node/MR
+RUN git clone https://github.com/MRSHABAN40/TEST.git /home/node/TEST
+WORKDIR /home/node/TEST
 RUN chmod -R 777 /home/node/MR/
 RUN yarn install --network-concurrency 1
 EXPOSE 7860
