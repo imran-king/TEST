@@ -20,7 +20,7 @@
     "util": "^0.12.4",
     "express": "5.1.0",
     "moment-timezone": "^0.5.45",
-    "axios": "^1.2.5",
+    "axios": "^1.10.0",
     "crypto-digest-sync": "^1.0.0",
     "crypto-js": "4.2.0",
     "file_size_url": "1.0.4",
