@@ -168,19 +168,18 @@ _Reply with:_
       caption: ytmsg
     }, { quoted: mek });
 
-    // Listen for the next message from the same user
-    const filter = (msg) =>
-      msg.key.remoteJid === from &&
-      msg.key.participant === mek.key.participant &&
-      msg.message?.conversation &&
-      (msg.message.conversation === "1" || msg.message.conversation === "2");
-
+    // Define the listener
     const listener = async ({ messages }) => {
       const msg = messages[0];
       if (!msg || !msg.message || !msg.key.remoteJid) return;
 
-      let text = msg.message.conversation;
+      const sender = msg.key.participant || msg.key.remoteJid;
+      const originalSender = mek.key.participant || mek.key.remoteJid;
 
+      // Filter: only allow replies from original user
+      if (sender !== originalSender) return;
+
+      const text = msg.message.conversation?.trim();
       if (text === "1") {
         await conn.sendMessage(from, {
           audio: { url: song.downloadUrl },
@@ -194,23 +193,24 @@ _Reply with:_
           caption: `> *© Pᴏᴡᴇʀᴇᴅ Bʏ Sʜᴀʙᴀɴ-Mᴅ ♡*`
         }, { quoted: mek });
       } else {
-        await conn.sendMessage(from, { text: "Invalid option. Reply with 1 or 2 only." }, { quoted: mek });
+        await conn.sendMessage(from, { text: "❌ Invalid option. Reply with 1 or 2 only." }, { quoted: msg });
       }
 
-      // Unsubscribe after response
+      clearTimeout(timeout);
       conn.ev.off('messages.upsert', listener);
     };
 
-    // Set timeout for 60 seconds
+    // Timeout after 60 sec
     const timeout = setTimeout(() => {
       conn.ev.off('messages.upsert', listener);
       conn.sendMessage(from, { text: "⏱️ Time out. Please try again." }, { quoted: mek });
     }, 60000);
 
+    // Attach listener
     conn.ev.on('messages.upsert', listener);
 
   } catch (e) {
-    console.log("❌ Error in .play:", e);
+    console.log("❌ Error in .play command:", e);
     reply("An error occurred. Please try again later.");
   }
 });
