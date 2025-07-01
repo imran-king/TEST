@@ -34,7 +34,7 @@
     "node-fetch": "^3.3.2",
     "btch-downloader": "^4.0.7",
     "megajs": "^1.1.7",
-    "pdfkit": "^0.14.0",
+    "pdfkit": "^0.17.1",
     "wa_set_pkg": "1.0.5",
     "wa-sticker-formatter": "^4.4.4",
     "vm": "^0.1.0",
