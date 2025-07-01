@@ -120,71 +120,95 @@ const yt = await ytsearch(q);
 
 // Mp3 Url
 
-cmd({
-    pattern: "mp3",
-    alias: ["mp3"],
-    react: "🎛️",
-    desc: "Download YouTube song",
-    category: "main",
-    use: ".play <song name>",
-    filename: __filename
-},
-async (conn, mek, m, { from, q, reply }) => {
-    try {
-        if (!q) return reply("🎵  Please type the song name, e.g. *.play Tum Hi Ho*");
+cmd({ 
+  pattern: "mp3", 
+  alias: ["mp3"], 
+  react: "🎙️", 
+  desc: "Download YouTube song",
+  category: "main", 
+  use: '.play <Yt url or song name>', 
+  filename: __filename 
+}, 
+async (conn, mek, m, { from, prefix, quoted, q, reply }) => {
 
-        /* 1️⃣  Search YouTube */
-        const yt = await ytsearch(q);
-        if (!yt?.results?.length) return reply("❌  No YouTube results found.");
+  try {
+    if (!q) return await reply("Please provide a YouTube URL or song name.");
 
-        const vid   = yt.results[0];           // first result
-        const yurl  = vid.url;                 // full YouTube link
-        const thumb = vid.thumbnail || "";     // fallback if missing
+    const yt = await ytsearch(q);
+    if (yt.results.length < 1) return reply("No results found!");
 
-        /* 2️⃣  Hit Sparky’s MP3 API */
-        const api   = `https://api-aswin-sparky.koyeb.app/api/downloader/song?search=${encodeURIComponent(yurl)}`;
-        const res   = await fetch(api);
-        const json  = await res.json();
+    let yts = yt.results[0];
+    let apiUrl = `https://apis-keith.vercel.app/download/dlmp3?url=${encodeURIComponent(yts.url)}`;
 
-        if (!json?.status || !json?.data?.downloadURL)
-            return reply("❌  Failed to fetch the song. Try again later.");
+    let response = await fetch(apiUrl);
+    let res = await response.json();
 
-        /* 3️⃣  Pretty caption */
-        const caption =
-`*🎛️  SHABAN-MD YT MP3 DOWNLOADER  🎛️*
-
-╭━━❐━⪼
-┇๏ *Title*    –  ${vid.title}
-┇๏ *Duration* –  ${vid.timestamp}
-┇๏ *Views*    –  ${vid.views}
-┇๏ *Author*   –  ${vid.author.name}
-╰━━❑━⪼
-> *© Powered By Shaban-MD ♡*`;
-
-        /* 4️⃣  Send thumbnail + details */
-        await conn.sendMessage(from,
-            { image: { url: thumb }, caption },
-            { quoted: mek });
-
-        /* 5️⃣  Send playable audio */
-        await conn.sendMessage(from,
-            { audio: { url: json.data.downloadURL }, mimetype: "audio/mpeg" },
-            { quoted: mek });
-
-        /* 6️⃣  Send downloadable document */
-        await conn.sendMessage(from,
-            {
-                document: { url: json.data.downloadURL },
-                mimetype: "audio/mpeg",
-                fileName: `${json.data.title || vid.title}.mp3`,
-                caption: "> *© Powered By Shaban-MD ♡*"
-            },
-            { quoted: mek });
-
-    } catch (err) {
-        console.error(err);
-        reply("⚠️  An unexpected error occurred. Please try again later.");
+    if (!res.status || !res.result.success) {
+      return reply("Failed to fetch audio. Try again later.");
     }
+
+    const song = res.result.data;
+
+    let ytmsg = `*🎧 SHABAN-MD YT MP3 DOWNLOADER 🎧*
+    
+╭━━❐━⪼
+┇๏ *Title* - ${song.title}
+┇๏ *Duration* - ${song.duration} sec
+┇๏ *Format* - ${song.format}
+┇๏ *Quality* - ${song.quality}kbps
+╰━━❑━⪼
+
+_Reply with:_  
+*1* to receive as 🎵 *Audio*  
+*2* to receive as 📄 *Document*
+
+> *© Pᴏᴡᴇʀᴇᴅ Bʏ Sʜᴀʙᴀɴ-Mᴅ ♡*`;
+
+    // Send thumbnail & prompt for reply
+    await conn.sendMessage(from, {
+      image: { url: song.thumbnail },
+      caption: ytmsg
+    }, { quoted: mek });
+
+    // Await user response
+    const replyFilter = (msg) =>
+      msg.key.fromMe === false &&
+      msg.message &&
+      (msg.message.conversation === '1' || msg.message.conversation === '2');
+
+    const collected = await conn.awaitMessages(from, replyFilter, {
+      max: 1,
+      time: 60_000,
+      errors: ['timeout']
+    }).catch(() => {});
+
+    if (!collected || collected.length === 0) return reply("No response received. Cancelling...");
+
+    const userReply = collected[0].message.conversation.trim();
+
+    if (userReply === '1') {
+      await conn.sendMessage(from, {
+        audio: { url: song.downloadUrl },
+        mimetype: "audio/mpeg"
+      }, { quoted: mek });
+
+    } else if (userReply === '2') {
+      await conn.sendMessage(from, {
+        document: { url: song.downloadUrl },
+        mimetype: "audio/mpeg",
+        fileName: `${song.title}.mp3`,
+        caption: `> *© Pᴏᴡᴇʀᴇᴅ Bʏ Sʜᴀʙᴀɴ-Mᴅ ♡*`
+      }, { quoted: mek });
+
+    } else {
+      reply("Invalid choice. Please reply with 1 or 2.");
+    }
+
+  } catch (e) {
+    console.log(e);
+    reply("An error occurred. Please try again later.");
+  }
+
 });
 
 // Mp4 url
