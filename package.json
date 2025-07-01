@@ -25,7 +25,7 @@
     "crypto-js": "4.2.0",
     "file_size_url": "1.0.6",
     "fs-extra": "^11.3.0",
-    "ffmpeg": "^0.0.4",
+    "ffmpeg": "^0.12.15",
     "file-type": "^16.5.3",
     "fluent-ffmpeg": "^2.1.2",
     "form-data": "^4.0.0",
