@@ -19,7 +19,7 @@
     "pm2": "^6.0.8",
     "util": "^0.12.5",
     "express": "5.1.0",
-    "moment-timezone": "^0.5.45",
+    "moment-timezone": "^0.6.0",
     "axios": "^1.10.0",
     "crypto-digest-sync": "^1.0.0",
     "crypto-js": "4.2.0",
