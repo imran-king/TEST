@@ -120,17 +120,16 @@ const yt = await ytsearch(q);
 
 // Mp3 Url
 
-cmd({ 
-  pattern: "mp3", 
-  alias: ["mp3"], 
-  react: "🎙️", 
+cmd({
+  pattern: "mp3",
+  alias: ["mp3"],
+  react: "🎶",
   desc: "Download YouTube song",
-  category: "main", 
-  use: '.play <Yt url or song name>', 
-  filename: __filename 
-}, 
-async (conn, mek, m, { from, prefix, quoted, q, reply }) => {
-
+  category: "main",
+  use: '.play <Yt url or song name>',
+  filename: __filename
+},
+async (conn, mek, m, { from, quoted, q, reply }) => {
   try {
     if (!q) return await reply("Please provide a YouTube URL or song name.");
 
@@ -150,7 +149,7 @@ async (conn, mek, m, { from, prefix, quoted, q, reply }) => {
     const song = res.result.data;
 
     let ytmsg = `*🎧 SHABAN-MD YT MP3 DOWNLOADER 🎧*
-    
+
 ╭━━❐━⪼
 ┇๏ *Title* - ${song.title}
 ┇๏ *Duration* - ${song.duration} sec
@@ -164,51 +163,56 @@ _Reply with:_
 
 > *© Pᴏᴡᴇʀᴇᴅ Bʏ Sʜᴀʙᴀɴ-Mᴅ ♡*`;
 
-    // Send thumbnail & prompt for reply
     await conn.sendMessage(from, {
       image: { url: song.thumbnail },
       caption: ytmsg
     }, { quoted: mek });
 
-    // Await user response
-    const replyFilter = (msg) =>
-      msg.key.fromMe === false &&
-      msg.message &&
-      (msg.message.conversation === '1' || msg.message.conversation === '2');
+    // Listen for the next message from the same user
+    const filter = (msg) =>
+      msg.key.remoteJid === from &&
+      msg.key.participant === mek.key.participant &&
+      msg.message?.conversation &&
+      (msg.message.conversation === "1" || msg.message.conversation === "2");
 
-    const collected = await conn.awaitMessages(from, replyFilter, {
-      max: 1,
-      time: 60_000,
-      errors: ['timeout']
-    }).catch(() => {});
+    const listener = async ({ messages }) => {
+      const msg = messages[0];
+      if (!msg || !msg.message || !msg.key.remoteJid) return;
 
-    if (!collected || collected.length === 0) return reply("No response received. Cancelling...");
+      let text = msg.message.conversation;
 
-    const userReply = collected[0].message.conversation.trim();
+      if (text === "1") {
+        await conn.sendMessage(from, {
+          audio: { url: song.downloadUrl },
+          mimetype: "audio/mpeg"
+        }, { quoted: mek });
+      } else if (text === "2") {
+        await conn.sendMessage(from, {
+          document: { url: song.downloadUrl },
+          mimetype: "audio/mpeg",
+          fileName: `${song.title}.mp3`,
+          caption: `> *© Pᴏᴡᴇʀᴇᴅ Bʏ Sʜᴀʙᴀɴ-Mᴅ ♡*`
+        }, { quoted: mek });
+      } else {
+        await conn.sendMessage(from, { text: "Invalid option. Reply with 1 or 2 only." }, { quoted: mek });
+      }
 
-    if (userReply === '1') {
-      await conn.sendMessage(from, {
-        audio: { url: song.downloadUrl },
-        mimetype: "audio/mpeg"
-      }, { quoted: mek });
+      // Unsubscribe after response
+      conn.ev.off('messages.upsert', listener);
+    };
 
-    } else if (userReply === '2') {
-      await conn.sendMessage(from, {
-        document: { url: song.downloadUrl },
-        mimetype: "audio/mpeg",
-        fileName: `${song.title}.mp3`,
-        caption: `> *© Pᴏᴡᴇʀᴇᴅ Bʏ Sʜᴀʙᴀɴ-Mᴅ ♡*`
-      }, { quoted: mek });
+    // Set timeout for 60 seconds
+    const timeout = setTimeout(() => {
+      conn.ev.off('messages.upsert', listener);
+      conn.sendMessage(from, { text: "⏱️ Time out. Please try again." }, { quoted: mek });
+    }, 60000);
 
-    } else {
-      reply("Invalid choice. Please reply with 1 or 2.");
-    }
+    conn.ev.on('messages.upsert', listener);
 
   } catch (e) {
-    console.log(e);
+    console.log("❌ Error in .play:", e);
     reply("An error occurred. Please try again later.");
   }
-
 });
 
 // Mp4 url
